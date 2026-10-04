@@ -1,12 +1,12 @@
 import { $, $$, browser, driver } from '@wdio/globals';
 
 class ShopPage {
-  get browseTab() {
-    return $('id:tab-Browse');
+  get searchShortcut() {
+    return $('-ios predicate string:(name ENDSWITH "Search Products" OR label ENDSWITH "Search Products")');
   }
 
-  get cartTab() {
-    return $('id:tab-Cart');
+  get searchInput() {
+    return $('-ios predicate string:name == "searchInput"');
   }
 
   get products() {
@@ -58,41 +58,48 @@ class ShopPage {
   }
 
   async openBrowse() {
-    await this.browseTab.waitForExist({
+    await this.searchShortcut.waitForDisplayed({
       timeout: 30000
     });
 
-    await this.browseTab.click();
+    await this.searchShortcut.click();
+
+    await this.searchInput.waitForDisplayed({
+      timeout: 20000
+    });
+
+    await this.searchInput.setValue('a');
 
     await browser.waitUntil(
       async () => (await this.products).length > 0,
       {
         timeout: 30000,
         interval: 1000,
-        timeoutMsg: 'A lista de produtos não foi carregada na aba Browse.'
+        timeoutMsg: 'Nenhum produto foi carregado na busca.'
       }
     );
   }
 
   async addAvailableProductToCart() {
-    const items = await this.products;
-    const attempts = Math.min(items.length, 5);
+    const initialItems = await this.products;
+    const attempts = Math.min(initialItems.length, 8);
 
     for (let index = 0; index < attempts; index++) {
-      const currentItems = await this.products;
+      const items = await this.products;
 
-      if (!currentItems[index]) {
+      if (!items[index]) {
         break;
       }
 
-      await currentItems[index].click();
+      await items[index].click();
 
       try {
         await this.addToCartButton.waitForDisplayed({
           timeout: 15000
         });
       } catch {
-        await this.openBrowse();
+        await driver.back();
+        await this.searchInput.waitForDisplayed({ timeout: 10000 });
         continue;
       }
 
@@ -100,7 +107,8 @@ class ShopPage {
       await browser.pause(2500);
 
       if (await this.stockError.isExisting()) {
-        await this.openBrowse();
+        await driver.back();
+        await this.searchInput.waitForDisplayed({ timeout: 10000 });
         continue;
       }
 
@@ -113,15 +121,11 @@ class ShopPage {
   }
 
   async openCart() {
-    if (await this.cartTab.isExisting()) {
-      await this.cartTab.click();
-    } else {
-      await this.cartButton.waitForDisplayed({
-        timeout: 20000
-      });
+    await this.cartButton.waitForDisplayed({
+      timeout: 20000
+    });
 
-      await this.cartButton.click();
-    }
+    await this.cartButton.click();
 
     await browser.pause(3000);
   }
