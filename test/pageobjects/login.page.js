@@ -1,4 +1,4 @@
-import { $, $$, browser, driver } from '@wdio/globals';
+import { $, browser, driver } from '@wdio/globals';
 
 class LoginPage {
   get email() {
@@ -11,6 +11,14 @@ class LoginPage {
 
   get loginButton() {
     return $('~btnLogin');
+  }
+
+  get invalidPasswordMessage() {
+    return $('-ios predicate string:(name == "Password is incorrect" OR label == "Password is incorrect")');
+  }
+
+  get homeSearch() {
+    return $('-ios predicate string:(name ENDSWITH "Search Products" OR label ENDSWITH "Search Products")');
   }
 
   async login(email, password) {
@@ -28,38 +36,22 @@ class LoginPage {
 
     await this.loginButton.click();
 
-    try {
-      await browser.waitUntil(
-        async () => !(await this.email.isExisting()),
-        {
-          timeout: 20000,
-          interval: 1000,
-          timeoutMsg: 'A tela de login permaneceu aberta após a autenticação.'
-        }
-      );
-    } catch (error) {
-      const labels = await $$('XCUIElementTypeStaticText');
-      const visibleTexts = [];
-
-      for (const label of labels) {
-        try {
-          const text = await label.getText();
-
-          if (text) {
-            visibleTexts.push(text);
-          }
-        } catch {
-          // Ignora elementos que desaparecerem enquanto a tela atualiza.
-        }
+    await browser.waitUntil(
+      async () =>
+        (await this.homeSearch.isExisting()) ||
+        (await this.invalidPasswordMessage.isExisting()),
+      {
+        timeout: 30000,
+        interval: 1000,
+        timeoutMsg: 'A autenticação não apresentou a Home nem mensagem de senha inválida.'
       }
+    );
 
-      throw new Error(
-        'Login não concluído. Textos visíveis na tela: ' +
-          visibleTexts.join(' | ')
-      );
+    if (await this.invalidPasswordMessage.isExisting()) {
+      throw new Error('Login não concluído: Password is incorrect.');
     }
 
-    await browser.pause(3000);
+    await this.homeSearch.waitForDisplayed({ timeout: 10000 });
   }
 }
 
