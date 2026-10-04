@@ -50,3 +50,11 @@ jobs:
 
       - name: Executar testes iOS no BrowserStack
         run: npx wdio run ./config/wdio.browserstack.conf.js
+
+      - name: Salvar evidências da execução
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencias-mobile-ci
+          path: artifacts/
+          if-no-files-found: ignore
