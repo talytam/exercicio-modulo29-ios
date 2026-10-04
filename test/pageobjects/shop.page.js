@@ -6,7 +6,7 @@ class ShopPage {
   }
 
   get homeTitle() {
-    return $('-ios predicate string:(name == "EBAC Store" OR label == "EBAC Store")');
+    return $('-ios predicate string:type == "XCUIElementTypeStaticText" AND name == "EBAC Store"');
   }
 
   get firstProduct() {
@@ -158,11 +158,12 @@ class ShopPage {
   }
 
   async openCart() {
-    // Produto -> Browse -> Home.
-    await driver.back();
+    // O comando nativo de voltar não navega corretamente neste app iOS.
+    // Usa a seta visível do próprio aplicativo: Produto -> Browse -> Home.
+    await this.tap(30, 88);
     await browser.pause(2000);
 
-    await driver.back();
+    await this.tap(30, 88);
 
     await this.homeTitle.waitForDisplayed({
       timeout: 20000
