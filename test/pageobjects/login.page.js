@@ -1,4 +1,4 @@
-import { $ } from '@wdio/globals';
+import { $, driver } from '@wdio/globals';
 
 class LoginPage {
   get email() {
@@ -15,7 +15,15 @@ class LoginPage {
 
   async login(email, password) {
     await this.email.setValue(email);
-    await this.password.setValue(password);
+
+    const passwordField = await this.password;
+    await passwordField.click();
+
+    await driver.setValueImmediate(
+      passwordField.elementId,
+      password
+    );
+
     await this.loginButton.click();
   }
 }

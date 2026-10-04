@@ -13,10 +13,14 @@ describe('Módulo 29 - Checkout iOS', () => {
     );
 
     await shopPage.openBrowse();
-    await shopPage.openFirstProduct();
-    await shopPage.addProductToCart();
+    await shopPage.addAvailableProductToCart();
+    await shopPage.openCart();
     await shopPage.addAddressIfNeeded();
     await shopPage.finishCheckout();
+
+    await shopPage.successMessage.waitForDisplayed({
+      timeout: 30000
+    });
 
     await expect(shopPage.successMessage).toBeDisplayed();
   });

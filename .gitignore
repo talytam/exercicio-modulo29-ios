@@ -3,3 +3,8 @@ node_modules/
 allure-results/
 allure-report/
 .DS_Store
+
+*.ipa
+*.app/
+apos-login*.png
+sauce-devices.json
