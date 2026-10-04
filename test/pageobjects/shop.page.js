@@ -17,6 +17,10 @@ class ShopPage {
     return $('-ios predicate string:(name CONTAINS[c] "quantities available" OR label CONTAINS[c] "quantities available")');
   }
 
+  get cartTab() {
+    return $('id:tab-Cart');
+  }
+
   get cartButton() {
     return $('-ios predicate string:(name == "cart" OR name == "Cart" OR label == "cart" OR label == "Cart")');
   }
@@ -143,13 +147,36 @@ class ShopPage {
   }
 
   async openCart() {
-    await this.cartButton.waitForDisplayed({
-      timeout: 20000
-    });
+    if (await this.cartTab.isExisting()) {
+      await this.cartTab.click();
+      await browser.pause(3000);
+      return;
+    }
 
-    await this.cartButton.click();
+    if (await this.cartButton.isExisting()) {
+      await this.cartButton.click();
+      await browser.pause(3000);
+      return;
+    }
 
-    await browser.pause(3000);
+    const buttons = await $('XCUIElementTypeButton');
+    const buttonNames = [];
+
+    for (const button of buttons) {
+      try {
+        const name = await button.getAttribute('name');
+        const label = await button.getAttribute('label');
+
+        buttonNames.push(`name=${name}; label=${label}`);
+      } catch {
+        // Ignora elementos que desaparecerem enquanto a tela atualiza.
+      }
+    }
+
+    throw new Error(
+      'Carrinho não localizado. Botões disponíveis: ' +
+        buttonNames.join(' | ')
+    );
   }
 
   async addAddressIfNeeded() {
