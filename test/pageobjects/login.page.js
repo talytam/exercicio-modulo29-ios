@@ -17,8 +17,8 @@ class LoginPage {
     return $('-ios predicate string:(name == "Password is incorrect" OR label == "Password is incorrect")');
   }
 
-  get homeSearch() {
-    return $('-ios predicate string:(name ENDSWITH "Search Products" OR label ENDSWITH "Search Products")');
+  get homeTitle() {
+    return $('-ios predicate string:(name == "EBAC Store" OR label == "EBAC Store")');
   }
 
   async login(email, password) {
@@ -38,7 +38,7 @@ class LoginPage {
 
     await browser.waitUntil(
       async () =>
-        (await this.homeSearch.isExisting()) ||
+        (await this.homeTitle.isExisting()) ||
         (await this.invalidPasswordMessage.isExisting()),
       {
         timeout: 30000,
@@ -51,7 +51,8 @@ class LoginPage {
       throw new Error('Login não concluído: Password is incorrect.');
     }
 
-    await this.homeSearch.waitForDisplayed({ timeout: 10000 });
+    await this.homeTitle.waitForDisplayed({ timeout: 10000 });
+    await browser.pause(2000);
   }
 }
 

@@ -1,10 +1,6 @@
 import { $, $$, browser, driver } from '@wdio/globals';
 
 class ShopPage {
-  get searchShortcut() {
-    return $('-ios predicate string:(name ENDSWITH "Search Products" OR label ENDSWITH "Search Products")');
-  }
-
   get searchInput() {
     return $('-ios predicate string:name == "searchInput"');
   }
@@ -58,11 +54,37 @@ class ShopPage {
   }
 
   async openBrowse() {
-    await this.searchShortcut.waitForDisplayed({
-      timeout: 30000
-    });
+    await browser.pause(2500);
 
-    await this.searchShortcut.click();
+    await driver.performActions([
+      {
+        type: 'pointer',
+        id: 'finger1',
+        parameters: {
+          pointerType: 'touch'
+        },
+        actions: [
+          {
+            type: 'pointerMove',
+            duration: 0,
+            x: 195,
+            y: 125
+          },
+          {
+            type: 'pointerDown',
+            button: 0
+          },
+          {
+            type: 'pause',
+            duration: 100
+          },
+          {
+            type: 'pointerUp',
+            button: 0
+          }
+        ]
+      }
+    ]);
 
     await this.searchInput.waitForDisplayed({
       timeout: 20000
@@ -75,7 +97,7 @@ class ShopPage {
       {
         timeout: 30000,
         interval: 1000,
-        timeoutMsg: 'Nenhum produto foi carregado na busca.'
+        timeoutMsg: 'Nenhum produto foi carregado após a busca.'
       }
     );
   }
