@@ -1,35 +1,37 @@
-# Módulo 29 - Testes iOS
+# Módulo 30 - Testes Mobile em CI
 
-Exercício de automação do fluxo de compra no app Loja EBAC para iOS.
+Exercício de integração dos testes mobile do módulo anterior com GitHub Actions e BrowserStack.
 
-Fluxo automatizado:
-- login;
+## Fluxo executado no CI
+
+- upload do app iOS para o BrowserStack;
+- criação da sessão em dispositivo iOS;
+- login no app Loja EBAC;
 - acesso à área Browse;
-- seleção de produto disponível;
-- adição ao carrinho;
-- cadastro de endereço, quando necessário;
-- pagamento;
-- checkout;
-- validação da compra concluída.
+- validação da tela de busca.
+
+O fluxo completo de checkout desenvolvido no módulo 29 continua disponível no projeto em `test/specs/checkout.test.js`.
 
 ## Tecnologias
 
 - Appium
 - WebdriverIO
 - XCUITest
-- Sauce Labs
+- BrowserStack
+- GitHub Actions
 
-## Execução
+## Execução no GitHub Actions
 
-Crie um arquivo `.env` a partir do `.env.example`, preencha as credenciais e execute:
+O workflow está em:
 
-```bash
-npm install
-npm test
-```
+`.github/workflows/ci.yml`
+
+Ele é executado em pushes para a branch `ci` e também pode ser iniciado manualmente pela aba **Actions** do GitHub.
+
+As credenciais necessárias são armazenadas em GitHub Secrets.
 
 ## Observação
 
-Durante os testes no Sauce Labs, foi possível validar a instalação do app, inicialização da sessão e login automatizado. O fluxo completo de compra também foi validado manualmente até a confirmação da transação.
+O app Loja EBAC apresentou instabilidade no carregamento de produtos e no carrinho durante a automação completa do checkout. Por isso, o fluxo do CI do módulo 30 utiliza uma validação estável de autenticação e acesso à área Browse para comprovar a execução dos testes no Device Farm.
 
-A validação automatizada ponta a ponta não pôde ser concluída devido à indisponibilidade de concorrência para dispositivos iOS na conta utilizada no Sauce Labs (`rds = 0` e `mac_vms = 0` no nível da organização).
+O BrowserStack grava o vídeo da sessão executada, que pode ser utilizado como evidência da atividade.

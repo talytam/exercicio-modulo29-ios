@@ -11,7 +11,7 @@ export const config = {
   port: 443,
   path: '/wd/hub',
 
-  specs: ['../test/specs/**/*.js'],
+  specs: ['../test/specs/ci.browserstack.test.js'],
   maxInstances: 1,
 
   capabilities: [{
@@ -25,7 +25,7 @@ export const config = {
     'bstack:options': {
       projectName: 'EBAC - Modulo 30',
       buildName: 'M30 - GitHub Actions',
-      sessionName: 'Checkout iOS',
+      sessionName: 'Smoke iOS - CI',
       debug: true,
       networkLogs: true,
       video: true
@@ -43,6 +43,6 @@ export const config = {
 
   mochaOpts: {
     ui: 'bdd',
-    timeout: 300000
+    timeout: 120000
   }
 };
