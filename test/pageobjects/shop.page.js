@@ -1,6 +1,14 @@
 import { $, $$, browser, driver } from '@wdio/globals';
 
 class ShopPage {
+  get browseTab() {
+    return $('id:tab-Browse');
+  }
+
+  get cartTab() {
+    return $('id:tab-Cart');
+  }
+
   get products() {
     return $$('-ios predicate string:name == "productDetails"');
   }
@@ -50,62 +58,49 @@ class ShopPage {
   }
 
   async openBrowse() {
-    await browser.pause(5000);
+    await this.browseTab.waitForExist({
+      timeout: 30000
+    });
 
-    await driver.performActions([
+    await this.browseTab.click();
+
+    await browser.waitUntil(
+      async () => (await this.products).length > 0,
       {
-        type: 'pointer',
-        id: 'finger1',
-        parameters: {
-          pointerType: 'touch'
-        },
-        actions: [
-          {
-            type: 'pointerMove',
-            duration: 0,
-            x: 195,
-            y: 125
-          },
-          {
-            type: 'pointerDown',
-            button: 0
-          },
-          {
-            type: 'pause',
-            duration: 100
-          },
-          {
-            type: 'pointerUp',
-            button: 0
-          }
-        ]
+        timeout: 30000,
+        interval: 1000,
+        timeoutMsg: 'A lista de produtos não foi carregada na aba Browse.'
       }
-    ]);
-
-    await browser.pause(5000);
+    );
   }
 
   async addAvailableProductToCart() {
-    for (let index = 0; index < 5; index++) {
-      const items = await this.products;
+    const items = await this.products;
+    const attempts = Math.min(items.length, 5);
 
-      if (!items[index]) {
+    for (let index = 0; index < attempts; index++) {
+      const currentItems = await this.products;
+
+      if (!currentItems[index]) {
         break;
       }
 
-      await items[index].click();
+      await currentItems[index].click();
 
-      await this.addToCartButton.waitForDisplayed({
-        timeout: 20000
-      });
+      try {
+        await this.addToCartButton.waitForDisplayed({
+          timeout: 15000
+        });
+      } catch {
+        await this.openBrowse();
+        continue;
+      }
 
       await this.addToCartButton.click();
-
-      await browser.pause(2000);
+      await browser.pause(2500);
 
       if (await this.stockError.isExisting()) {
-        await driver.back();
-        await browser.pause(3000);
+        await this.openBrowse();
         continue;
       }
 
@@ -113,16 +108,20 @@ class ShopPage {
     }
 
     throw new Error(
-      'Não foi possível localizar um produto com estoque disponível.'
+      'Não foi possível adicionar um produto disponível ao carrinho.'
     );
   }
 
   async openCart() {
-    await this.cartButton.waitForDisplayed({
-      timeout: 20000
-    });
+    if (await this.cartTab.isExisting()) {
+      await this.cartTab.click();
+    } else {
+      await this.cartButton.waitForDisplayed({
+        timeout: 20000
+      });
 
-    await this.cartButton.click();
+      await this.cartButton.click();
+    }
 
     await browser.pause(3000);
   }
@@ -146,6 +145,8 @@ class ShopPage {
     await $(
       '-ios predicate string:(name == "Save" OR label == "Save")'
     ).click();
+
+    await browser.pause(2000);
   }
 
   async finishCheckout() {
