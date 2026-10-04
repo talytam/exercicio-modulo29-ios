@@ -82,8 +82,6 @@ class ShopPage {
       }
     ]);
 
-    await driver.releaseActions();
-
     await browser.pause(5000);
   }
 
