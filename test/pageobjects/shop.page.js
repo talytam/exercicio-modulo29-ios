@@ -159,23 +159,11 @@ class ShopPage {
       return;
     }
 
-    const buttons = await $('XCUIElementTypeButton');
-    const buttonNames = [];
-
-    for (const button of buttons) {
-      try {
-        const name = await button.getAttribute('name');
-        const label = await button.getAttribute('label');
-
-        buttonNames.push(`name=${name}; label=${label}`);
-      } catch {
-        // Ignora elementos que desaparecerem enquanto a tela atualiza.
-      }
-    }
+    const source = await driver.getPageSource();
 
     throw new Error(
-      'Carrinho não localizado. Botões disponíveis: ' +
-        buttonNames.join(' | ')
+      'Carrinho não localizado. PAGE_SOURCE=' +
+        source.replace(/\s+/g, ' ').slice(0, 12000)
     );
   }
 
