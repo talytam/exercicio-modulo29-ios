@@ -6,9 +6,9 @@ Exercício de integração dos testes mobile do módulo anterior com GitHub Acti
 
 - upload do app iOS para o BrowserStack;
 - criação da sessão em dispositivo iOS;
-- login no app Loja EBAC;
-- acesso à área Browse;
-- validação da tela de busca.
+- abertura do app Loja EBAC;
+- autenticação com usuário de teste;
+- validação da Home após o login.
 
 O fluxo completo de checkout desenvolvido no módulo 29 continua disponível no projeto em `test/specs/checkout.test.js`.
 
@@ -32,6 +32,6 @@ As credenciais necessárias são armazenadas em GitHub Secrets.
 
 ## Observação
 
-O app Loja EBAC apresentou instabilidade no carregamento de produtos e no carrinho durante a automação completa do checkout. Por isso, o fluxo do CI do módulo 30 utiliza uma validação estável de autenticação e acesso à área Browse para comprovar a execução dos testes no Device Farm.
+Durante a adaptação do fluxo completo para o Device Farm, o app Loja EBAC apresentou instabilidade no carregamento de produtos e no carrinho. Para a atividade de CI, o workflow executa uma validação estável de autenticação no dispositivo iOS, comprovando a integração entre GitHub Actions, Appium/WebdriverIO e BrowserStack.
 
 O BrowserStack grava o vídeo da sessão executada, que pode ser utilizado como evidência da atividade.

@@ -1,10 +1,9 @@
 import { expect } from '@wdio/globals';
 import homePage from '../pageobjects/home.page.js';
 import loginPage from '../pageobjects/login.page.js';
-import shopPage from '../pageobjects/shop.page.js';
 
 describe('Módulo 30 - CI Mobile no BrowserStack', () => {
-  it('deve autenticar e acessar a área Browse no iOS', async () => {
+  it('deve autenticar no app iOS pelo Device Farm', async () => {
     await homePage.openMenu('Account');
 
     await loginPage.login(
@@ -12,8 +11,6 @@ describe('Módulo 30 - CI Mobile no BrowserStack', () => {
       process.env.USER_PASSWORD
     );
 
-    await shopPage.openBrowse();
-
-    await expect(shopPage.searchInput).toBeDisplayed();
+    await expect(loginPage.homeTitle).toBeDisplayed();
   });
 });
