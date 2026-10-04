@@ -52,13 +52,37 @@ class ShopPage {
   async openBrowse() {
     await browser.pause(5000);
 
-    // A consulta de elementos na Home apresentou instabilidade
-    // no WebDriverAgent durante as execuções no Sauce Labs.
-    await driver.touchAction({
-      action: 'tap',
-      x: 195,
-      y: 125
-    });
+    await driver.performActions([
+      {
+        type: 'pointer',
+        id: 'finger1',
+        parameters: {
+          pointerType: 'touch'
+        },
+        actions: [
+          {
+            type: 'pointerMove',
+            duration: 0,
+            x: 195,
+            y: 125
+          },
+          {
+            type: 'pointerDown',
+            button: 0
+          },
+          {
+            type: 'pause',
+            duration: 100
+          },
+          {
+            type: 'pointerUp',
+            button: 0
+          }
+        ]
+      }
+    ]);
+
+    await driver.releaseActions();
 
     await browser.pause(5000);
   }
