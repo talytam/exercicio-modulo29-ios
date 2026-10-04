@@ -5,8 +5,8 @@ class ShopPage {
     return $('id:tab-Browse');
   }
 
-  get homeTitle() {
-    return $('-ios predicate string:type == "XCUIElementTypeStaticText" AND name == "EBAC Store"');
+  get browseTitle() {
+    return $('-ios predicate string:type == "XCUIElementTypeStaticText" AND name == "Browse"');
   }
 
   get firstProduct() {
@@ -158,18 +158,15 @@ class ShopPage {
   }
 
   async openCart() {
-    // O comando nativo de voltar não navega corretamente neste app iOS.
-    // Usa a seta visível do próprio aplicativo: Produto -> Browse -> Home.
+    // Produto -> Browse pelo botão de voltar do próprio app.
     await this.tap(30, 88);
     await browser.pause(2000);
 
-    await this.tap(30, 88);
-
-    await this.homeTitle.waitForDisplayed({
+    await this.browseTitle.waitForDisplayed({
       timeout: 20000
     });
 
-    // Ícone do carrinho no topo direito da Home.
+    // O ícone do carrinho também fica disponível no topo da tela Browse.
     await this.tap(360, 87);
 
     await browser.pause(4000);
