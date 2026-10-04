@@ -9,6 +9,10 @@ class ShopPage {
     return $('-ios predicate string:type == "XCUIElementTypeStaticText" AND name == "Browse"');
   }
 
+  get searchInput() {
+    return $('~searchInput');
+  }
+
   get firstProduct() {
     return $('~productDetails');
   }
@@ -21,8 +25,12 @@ class ShopPage {
     return $('~addToCart');
   }
 
-  get stockError() {
-    return $('-ios predicate string:(name CONTAINS[c] "quantities available" OR label CONTAINS[c] "quantities available")');
+  get cartTitle() {
+    return $('-ios predicate string:type == "XCUIElementTypeStaticText" AND name == "My Cart"');
+  }
+
+  get emptyCartMessage() {
+    return $('-ios predicate string:(name CONTAINS[c] "Your cart is empty" OR label CONTAINS[c] "Your cart is empty")');
   }
 
   get addNewAddressButton() {
@@ -96,80 +104,96 @@ class ShopPage {
 
     await this.browseTab.click();
 
-    try {
-      await this.firstProduct.waitForDisplayed({
-        timeout: 60000
-      });
-    } catch {
-      // A lista é instável. Retorna à Home e tenta carregar a aba novamente.
-      await driver.back();
-      await browser.pause(2500);
+    await this.searchInput.waitForDisplayed({
+      timeout: 30000
+    });
+  }
 
-      await this.browseTab.waitForDisplayed({
-        timeout: 20000
-      });
+  async openCartFromBrowse() {
+    await this.browseTitle.waitForDisplayed({
+      timeout: 20000
+    });
 
-      await this.browseTab.click();
+    await this.tap(360, 87);
 
-      await this.firstProduct.waitForDisplayed({
-        timeout: 60000
-      });
-    }
+    await this.cartTitle.waitForDisplayed({
+      timeout: 20000
+    });
+  }
+
+  async backToBrowse() {
+    await this.tap(30, 88);
+
+    await this.browseTitle.waitForDisplayed({
+      timeout: 20000
+    });
   }
 
   async addAvailableProductToCart() {
-    const attempts = 6;
+    const searchTerms = [
+      'Fish',
+      'PlayStation 5',
+      'Produto Contrato QA',
+      'Camiseta EBAC',
+      'bag pandora',
+      'Table'
+    ];
 
-    for (let index = 0; index < attempts; index++) {
-      const items = await this.products;
+    for (const term of searchTerms) {
+      await this.searchInput.waitForDisplayed({
+        timeout: 20000
+      });
 
-      if (!items[index]) {
-        await browser.pause(3000);
+      await this.searchInput.clearValue();
+      await this.searchInput.setValue(term);
+
+      try {
+        await this.firstProduct.waitForDisplayed({
+          timeout: 20000
+        });
+      } catch {
         continue;
       }
 
-      await items[index].click();
+      const items = await this.products;
+
+      if (!items[0]) {
+        continue;
+      }
+
+      await items[0].click();
 
       try {
         await this.addToCartButton.waitForDisplayed({
           timeout: 20000
         });
       } catch {
-        await driver.back();
-        await this.firstProduct.waitForDisplayed({ timeout: 20000 });
+        await this.tap(30, 88);
+        await this.browseTitle.waitForDisplayed({ timeout: 20000 });
         continue;
       }
 
       await this.addToCartButton.click();
-      await browser.pause(2500);
+      await browser.pause(2000);
 
-      if (await this.stockError.isExisting()) {
-        await driver.back();
-        await this.firstProduct.waitForDisplayed({ timeout: 20000 });
+      // Volta do detalhe para Browse e usa o carrinho real como validação.
+      await this.tap(30, 88);
+      await this.browseTitle.waitForDisplayed({ timeout: 20000 });
+
+      await this.openCartFromBrowse();
+
+      if (await this.emptyCartMessage.isExisting()) {
+        await this.backToBrowse();
         continue;
       }
 
+      // Sucesso: permanece no carrinho com o produto adicionado.
       return;
     }
 
     throw new Error(
-      'Não foi possível adicionar um produto disponível ao carrinho.'
+      'Nenhum dos produtos testados foi efetivamente adicionado ao carrinho.'
     );
-  }
-
-  async openCart() {
-    // Produto -> Browse pelo botão de voltar do próprio app.
-    await this.tap(30, 88);
-    await browser.pause(2000);
-
-    await this.browseTitle.waitForDisplayed({
-      timeout: 20000
-    });
-
-    // O ícone do carrinho também fica disponível no topo da tela Browse.
-    await this.tap(360, 87);
-
-    await browser.pause(4000);
   }
 
   async addAddressIfNeeded() {

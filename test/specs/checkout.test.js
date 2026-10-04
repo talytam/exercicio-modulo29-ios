@@ -37,16 +37,13 @@ describe('Módulo 29 - Checkout iOS', () => {
       await evidence('02-busca-produtos');
 
       await shopPage.addAvailableProductToCart();
-      await evidence('03-apos-adicionar-carrinho');
-
-      await shopPage.openCart();
-      await evidence('04-carrinho');
+      await evidence('03-carrinho-com-item');
 
       await shopPage.addAddressIfNeeded();
-      await evidence('05-endereco');
+      await evidence('04-endereco');
 
       await shopPage.finishCheckout();
-      await evidence('06-apos-checkout');
+      await evidence('05-apos-checkout');
 
       await shopPage.successMessage.waitForDisplayed({
         timeout: 30000
