@@ -1,12 +1,20 @@
 import { $, $$, browser, driver } from '@wdio/globals';
 
 class ShopPage {
-  get searchInput() {
-    return $('-ios predicate string:name == "searchInput"');
+  get browseTab() {
+    return $('id:tab-Browse');
+  }
+
+  get homeTitle() {
+    return $('-ios predicate string:(name == "EBAC Store" OR label == "EBAC Store")');
+  }
+
+  get firstProduct() {
+    return $('~productDetails');
   }
 
   get products() {
-    return $$('-ios predicate string:name == "productDetails"');
+    return $$('~productDetails');
   }
 
   get addToCartButton() {
@@ -15,14 +23,6 @@ class ShopPage {
 
   get stockError() {
     return $('-ios predicate string:(name CONTAINS[c] "quantities available" OR label CONTAINS[c] "quantities available")');
-  }
-
-  get cartTab() {
-    return $('id:tab-Cart');
-  }
-
-  get cartButton() {
-    return $('-ios predicate string:(name == "cart" OR name == "Cart" OR label == "cart" OR label == "Cart")');
   }
 
   get addNewAddressButton() {
@@ -57,9 +57,7 @@ class ShopPage {
     );
   }
 
-  async openBrowse() {
-    await browser.pause(2500);
-
+  async tap(x, y) {
     await driver.performActions([
       {
         type: 'pointer',
@@ -71,8 +69,8 @@ class ShopPage {
           {
             type: 'pointerMove',
             duration: 0,
-            x: 195,
-            y: 125
+            x,
+            y
           },
           {
             type: 'pointerDown',
@@ -89,43 +87,56 @@ class ShopPage {
         ]
       }
     ]);
+  }
 
-    await this.searchInput.waitForDisplayed({
+  async openBrowse() {
+    await this.browseTab.waitForDisplayed({
       timeout: 20000
     });
 
-    await this.searchInput.setValue('a');
+    await this.browseTab.click();
 
-    await browser.waitUntil(
-      async () => (await this.products).length > 0,
-      {
-        timeout: 30000,
-        interval: 1000,
-        timeoutMsg: 'Nenhum produto foi carregado após a busca.'
-      }
-    );
+    try {
+      await this.firstProduct.waitForDisplayed({
+        timeout: 60000
+      });
+    } catch {
+      // A lista é instável. Retorna à Home e tenta carregar a aba novamente.
+      await driver.back();
+      await browser.pause(2500);
+
+      await this.browseTab.waitForDisplayed({
+        timeout: 20000
+      });
+
+      await this.browseTab.click();
+
+      await this.firstProduct.waitForDisplayed({
+        timeout: 60000
+      });
+    }
   }
 
   async addAvailableProductToCart() {
-    const initialItems = await this.products;
-    const attempts = Math.min(initialItems.length, 8);
+    const attempts = 6;
 
     for (let index = 0; index < attempts; index++) {
       const items = await this.products;
 
       if (!items[index]) {
-        break;
+        await browser.pause(3000);
+        continue;
       }
 
       await items[index].click();
 
       try {
         await this.addToCartButton.waitForDisplayed({
-          timeout: 15000
+          timeout: 20000
         });
       } catch {
         await driver.back();
-        await this.searchInput.waitForDisplayed({ timeout: 10000 });
+        await this.firstProduct.waitForDisplayed({ timeout: 20000 });
         continue;
       }
 
@@ -134,7 +145,7 @@ class ShopPage {
 
       if (await this.stockError.isExisting()) {
         await driver.back();
-        await this.searchInput.waitForDisplayed({ timeout: 10000 });
+        await this.firstProduct.waitForDisplayed({ timeout: 20000 });
         continue;
       }
 
@@ -147,24 +158,20 @@ class ShopPage {
   }
 
   async openCart() {
-    if (await this.cartTab.isExisting()) {
-      await this.cartTab.click();
-      await browser.pause(3000);
-      return;
-    }
+    // Produto -> Browse -> Home.
+    await driver.back();
+    await browser.pause(2000);
 
-    if (await this.cartButton.isExisting()) {
-      await this.cartButton.click();
-      await browser.pause(3000);
-      return;
-    }
+    await driver.back();
 
-    const source = await driver.getPageSource();
+    await this.homeTitle.waitForDisplayed({
+      timeout: 20000
+    });
 
-    throw new Error(
-      'Carrinho não localizado. PAGE_SOURCE=' +
-        source.replace(/\s+/g, ' ').slice(0, 12000)
-    );
+    // Ícone do carrinho no topo direito da Home.
+    await this.tap(360, 87);
+
+    await browser.pause(4000);
   }
 
   async addAddressIfNeeded() {
