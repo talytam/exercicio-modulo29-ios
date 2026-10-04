@@ -18,7 +18,7 @@ class ShopPage {
   }
 
   get addToCartButton() {
-    return $('-ios predicate string:(name CONTAINS[c] "Add To Cart" OR label CONTAINS[c] "Add To Cart")');
+    return $('~addToCart');
   }
 
   get stockError() {
