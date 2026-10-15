@@ -1,3 +1,5 @@
+> **Projeto concluído.** Este repositório preserva as entregas de automação iOS da formação em Engenharia de Qualidade de Software da EBAC, incluindo o histórico utilizado posteriormente na atividade de CI. O conteúdo também está consolidado no repositório [exercicios-ebac](https://github.com/talytam/exercicios-ebac).
+
 # Módulo 29 - Testes iOS
 
 Exercício de automação do fluxo de compra no app Loja EBAC para iOS.
